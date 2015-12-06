@@ -2,10 +2,13 @@ require 'torch'
 require 'nn'
 require 'image'
 require 'optim'
+require 'os'
 
 local loadcaffe_wrap = require 'loadcaffe_wrapper'
 
 --------------------------------------------------------------------------------
+
+timer = os.clock()
 
 local cmd = torch.CmdLine()
 
@@ -237,6 +240,7 @@ local function main(params)
 
   local function maybe_print(t, loss)
     local verbose = (params.print_iter > 0 and t % params.print_iter == 0)
+    local now = os.clock()
     if verbose then
       print(string.format('Iteration %d / %d', t, params.num_iterations))
       for i, loss_module in ipairs(content_losses) do
@@ -246,6 +250,9 @@ local function main(params)
         print(string.format('  Style %d loss: %f', i, loss_module.loss))
       end
       print(string.format('  Total loss: %f', loss))
+      print(string.format(' Time per iteration: %d s', (now-timer)/params.print_iter))
+      print(string.format(' Estimated total time: %d s', (now-timer)*params.num_iterations/params.print_iter))
+      timer = os.clock()
     end
   end
 
